@@ -25,9 +25,13 @@ void loop() {
 //    Serial.println(inputString);
 //    Serial.print("index , as \t");Serial.println(inputString.indexOf(','));
     yaw = inputString.substring(inputString.indexOf('=')+1, inputString.indexOf(',')).toFloat();
-    // clear the string:
-    if(yaw > 0){
-      myservo.write(yaw);
+    Serial.println(yaw);
+    if(yaw > 0 && yaw < 45){
+      myservo.write(0);
+    }else if(yaw > 45 && yaw < 135){
+      myservo.write(90);
+    }else if(yaw > 135 && yaw < 180){
+      myservo.write(180);
     }
     inputString = "";
     stringComplete = false;

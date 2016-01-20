@@ -1,0 +1,8 @@
+v1.2
+-three choise of control angle servo
+- yaw : 0-45 angle servo : 0
+- yaw : 45-135 angle servo : 90
+- yaw : 135-180 angle servo : 180
+v1.1
+-basic control servo with gy521
+-read yaw data and set angle of servo
