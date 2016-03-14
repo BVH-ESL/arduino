@@ -24,14 +24,25 @@ int speed_b;
 
 // connect motor controller pins to Arduino digital pins
 // motor one
-int enA = 5;    //D1
-int in1 = 4;    //D2
-int in2 = 2;    //D4
+#define enA     5       //D1
+#define in1     4       //D2
+#define in2     2       //D4
 
 // motor two
-int in3 = 13;   //D7
-int in4 = 12;   //D6
-int enB = 14;   //D5
+#define in3     13      //D7
+#define in4     12      //D6
+#define enB     14      //D5
+
+#include <Adafruit_NeoPixel.h>
+
+#ifdef __AVR__
+#include <avr/power.h>
+#endif
+
+#define LED_PIN  15      //D8
+Adafruit_NeoPixel pixels = Adafruit_NeoPixel(1, LED_PIN, NEO_GRB + NEO_KHZ800);
+int state = 0;
+int toggle = 0;
 
 void drive(int speed_a, int speed_b) {
   if (speed_a > 0 && speed_b > 0) {
@@ -111,10 +122,14 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t lenght
 
   switch (type) {
     case WStype_DISCONNECTED:
-      USE_SERIAL.printf("[%u] Disconnected!\n", num);
+      {
+        state = 0;
+        USE_SERIAL.printf("[%u] Disconnected!\n", num);
+      }
       break;
     case WStype_CONNECTED:
       {
+        state = 1;
         IPAddress ip = webSocket.remoteIP(num);
         USE_SERIAL.printf("[%u] Connected from %d.%d.%d.%d url: %s\n", num, ip[0], ip[1], ip[2], ip[3], payload);
 
@@ -123,38 +138,21 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t lenght
       }
       break;
     case WStype_TEXT:
-//      USE_SERIAL.printf("[%u] get Text: %s\n", lenght, payload);
+
       data_in += (char *)payload;
-//      USE_SERIAL.printf("[%u] get Text: %S\n", lenght, data_in);
-//      USE_SERIAL.printf("%s", data_in);
       checkInput(data_in);
       data_in = "";
-//      String stringData = (char*) payload;
-//      char* input_cr=(char*) &payload;
-//      String data_in = "";
-//      for (int i = 0; i < sizeof(payload); i++) {
-//       data_in += (char)payload[i];
-//      }
-//      checkInput(data_in);
-//      data_in = "";
-      // send message to client
-      // webSocket.sendTXT(num, "message here");
-
-      // send data to all connected clients
-      // webSocket.broadcastTXT("message here");
       break;
     case WStype_BIN:
       USE_SERIAL.printf("[%u] get binary lenght: %u\n", num, lenght);
       hexdump(payload, lenght);
-
-      // send message to client
-      // webSocket.sendBIN(num, payload, lenght);
       break;
   }
 
 }
 
 void setup() {
+  pixels.begin();
   // set all the motor control pins to outputs
   pinMode(enA, OUTPUT);
   pinMode(in1, OUTPUT);
@@ -179,7 +177,7 @@ void setup() {
     delay(1000);
   }
 
-  WiFiMulti.addAP("SSID", "passpasspass");
+  WiFiMulti.addAP("ESL_Lab1", "wifi@esl");
 
   while (WiFiMulti.run() != WL_CONNECTED) {
     delay(100);
@@ -190,5 +188,24 @@ void setup() {
 }
 
 void loop() {
+  if (state) {
+    pixels.setPixelColor(0, pixels.Color(0, 150, 0));
+
+    pixels.show();
+  } else {
+    if (toggle) {
+      pixels.setPixelColor(0, pixels.Color(0, 150, 0));
+
+      pixels.show();
+      delay(500);
+      toggle = 0;
+    } else {
+      pixels.setPixelColor(0, pixels.Color(0, 0, 0));
+
+      pixels.show();
+      delay(500);
+      toggle = 1;
+    }
+  }
   webSocket.loop();
 }
