@@ -189,12 +189,12 @@ void setup() {
 
 void loop() {
   if (state) {
-    pixels.setPixelColor(0, pixels.Color(0, 150, 0));
+    pixels.setPixelColor(0, pixels.Color(0, 50, 0));
 
     pixels.show();
   } else {
     if (toggle) {
-      pixels.setPixelColor(0, pixels.Color(0, 150, 0));
+      pixels.setPixelColor(0, pixels.Color(0, 50, 0));
 
       pixels.show();
       delay(500);
